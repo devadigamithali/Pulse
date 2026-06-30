@@ -19,14 +19,12 @@
       margin: 12px 0;
     }
     .article h2 { font-size: 16px; margin: 0 0 4px; }
+    .article h2 a { color: #1d4e57; text-decoration: none; }
+    .article h2 a:hover { text-decoration: underline; }
     .topic { color: #777; font-size: 13px; margin-bottom: 8px; }
     button {
-      font-size: 14px;
-      padding: 6px 12px;
-      border: 1px solid #888;
-      border-radius: 6px;
-      background: #fff;
-      cursor: pointer;
+      font-size: 14px; padding: 6px 12px; border: 1px solid #888;
+      border-radius: 6px; background: #fff; cursor: pointer;
     }
   </style>
 </head>
@@ -36,36 +34,22 @@
   <p>Today's articles</p>
   <div id="list">Loading…</div>
 
-
   <script>
-    // We keep the latest list of saved ids here so each button
-    // knows whether its article is currently saved.
     let savedIds = [];
 
-
-    // ----- When the page opens, load everything in order -----
-
-    // Step 1: ask the server which articles are already saved.
     fetch("/saved")
       .then((reply) => reply.json())
       .then((ids) => {
         savedIds = ids;
-
-        // Step 2: now ask for the articles themselves.
         return fetch("/articles");
       })
       .then((reply) => reply.json())
-      .then((articles) => {
-        // Step 3: show them on the page.
-        showArticles(articles);
-      })
+      .then((articles) => showArticles(articles))
       .catch(() => {
         document.getElementById("list").textContent =
           "Could not load articles. Is the server running?";
       });
 
-
-    // ----- Build the list of article cards -----
     function showArticles(articles) {
       const list = document.getElementById("list");
       list.innerHTML = "";
@@ -74,18 +58,18 @@
         const card = document.createElement("div");
         card.className = "article";
 
-        // Is this article already in our saved list?
         const isSaved = savedIds.includes(article.id);
 
+        // NEW: the title is now a link to the detail page.
+        // We attach the article's id to the address: article.html?id=2
         card.innerHTML =
-          "<h2>" + article.title + "</h2>" +
-          "<div class='topic'>" + article.topic + "</div>";
+          "<h2><a href='article.html?id=" + article.id + "'>" +
+              article.title +
+          "</a></h2>" +
+          "<div class='topic'>" + article.summary + "</div>";
 
-        // Make the Save button and set its starting text.
         const button = document.createElement("button");
         button.textContent = isSaved ? "Saved ✓" : "Save";
-
-        // When clicked, run toggleSave for this article.
         button.onclick = () => toggleSave(article.id, button);
 
         card.appendChild(button);
@@ -93,13 +77,9 @@
       });
     }
 
-
-    // ----- Save or unsave when a button is clicked -----
     function toggleSave(id, button) {
       const isSaved = savedIds.includes(id);
-
       if (isSaved) {
-        // Already saved -> ask the server to REMOVE it (DELETE).
         fetch("/saved/" + id, { method: "DELETE" })
           .then((reply) => reply.json())
           .then((ids) => {
@@ -107,11 +87,10 @@
             button.textContent = "Save";
           });
       } else {
-        // Not saved yet -> SEND it to the server to save (POST).
         fetch("/saved", {
-          method: "POST",                                   // the kind of request
-          headers: { "Content-Type": "application/json" },  // "I'm sending JSON"
-          body: JSON.stringify({ id: id }),                 // the data, as text
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: id }),
         })
           .then((reply) => reply.json())
           .then((ids) => {

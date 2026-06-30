@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Pulse — Article</title>
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 16px;
+      color: #222;
+      line-height: 1.6;
+    }
+    a.back { color: #1d4e57; text-decoration: none; font-size: 14px; }
+    a.back:hover { text-decoration: underline; }
+    h1 { margin: 16px 0 4px; }
+    .topic { color: #777; font-size: 13px; margin-bottom: 20px; }
+  </style>
+</head>
+
+<body>
+  <a class="back" href="/">← Back to all articles</a>
+
+  <!-- The article will be placed here once we fetch it. -->
+  <div id="content">Loading…</div>
+
+  <script>
+    // ----- The new idea: read information out of the URL -----
+
+    // The address looks like:  article.html?id=2
+    // URLSearchParams reads the part after the "?", so we can pull out the id.
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");   // e.g. "2"
+
+    // Ask the server for just that one article.
+    fetch("/articles/" + id)
+      .then((reply) => reply.json())
+      .then((article) => {
+        const content = document.getElementById("content");
+
+        // The server sends { error: ... } if the id doesn't exist.
+        if (article.error) {
+          content.textContent = "Sorry, that article was not found.";
+          return;
+        }
+
+        // The body has blank lines between paragraphs. Split on them
+        // so each paragraph becomes its own <p> for nicer reading.
+        const paragraphs = article.body
+          .split("\n\n")
+          .map((p) => "<p>" + p + "</p>")
+          .join("");
+
+        content.innerHTML =
+          "<h1>" + article.title + "</h1>" +
+          "<div class='topic'>" + article.topic + "</div>" +
+          paragraphs;
+      })
+      .catch(() => {
+        document.getElementById("content").textContent =
+          "Could not load this article. Is the server running?";
+      });
+  </script>
+</body>
+</html>
