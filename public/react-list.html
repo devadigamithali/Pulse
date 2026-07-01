@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Pulse (React)</title>
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      max-width: 640px; margin: 40px auto; padding: 0 16px; color: #222;
+    }
+    h1 { margin-bottom: 4px; }
+    .article {
+      border: 1px solid #ddd; border-radius: 8px;
+      padding: 12px 16px; margin: 12px 0;
+    }
+    .article h2 { font-size: 16px; margin: 0 0 4px; }
+    .topic { color: #777; font-size: 13px; }
+  </style>
+
+  <!-- React and a translator (Babel) loaded from the internet.
+       This is the no-install learning shortcut. Real projects bundle
+       these instead, but this is perfect for seeing the ideas work. -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <!-- React will draw everything inside this empty box. -->
+  <div id="root"></div>
+
+  <!-- type="text/babel" lets us write JSX (the HTML-looking code) here. -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // A "component" is just a function that returns what to show.
+    function App() {
+      // STATE: a piece of data React watches. It starts as an empty list.
+      // setArticles is how we change it — and when we do, React redraws
+      // the page for us automatically. (No createElement / appendChild!)
+      const [articles, setArticles] = useState([]);
+
+      // useEffect runs once, right after the component first appears.
+      // That makes it the natural place to fetch our data.
+      useEffect(() => {
+        fetch("/articles")
+          .then((reply) => reply.json())
+          .then((data) => setArticles(data)); // <-- updating state redraws the list
+      }, []); // the empty [] means "only run once"
+
+      // JSX: this looks like HTML but it's inside JavaScript.
+      // {curly braces} let us drop real values and loops into it.
+      return (
+        <div>
+          <h1>Pulse (React version)</h1>
+          <p>Today's articles</p>
+
+          {articles.map((article) => (
+            <div className="article" key={article.id}>
+              <h2>{article.title}</h2>
+              <div className="topic">{article.summary}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Put our App component inside the #root box on the page.
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
