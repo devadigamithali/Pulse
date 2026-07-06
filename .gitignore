@@ -1,1 +1,4 @@
 node_modules/
+.env
+pulse-frontend/node_modules/
+pulse-frontend/dist/

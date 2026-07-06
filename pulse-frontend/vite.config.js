@@ -14,6 +14,8 @@ export default defineConfig({
     proxy: {
       "/articles": "http://localhost:4000",
       "/saved": "http://localhost:4000",
+      "/auth":  "http://localhost:4000",
+      "/posts": "http://localhost:4000",
     },
   },
 });
